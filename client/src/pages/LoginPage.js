@@ -52,6 +52,7 @@ const LoginPage = (props) => {
             username: user.username,
             name: user.name,
             friendRequests: user.friendRequests,
+            friends: user.friends,
           };
           dispatch(chatAction.setUserId(user._id));
           console.log(user);

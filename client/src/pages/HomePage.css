@@ -1,9 +1,13 @@
+.home {
+    margin: 2rem;
+}
+
 .users-list,
 .friend-requests {
     display: flex;
     height: 300px;
     width: 300px;
-    overflow-y: scroll;
+    /*overflow-y: scroll;*/
     flex-direction: column;
     gap: 5px;
     border: 1px solid black;

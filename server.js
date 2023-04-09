@@ -6,7 +6,7 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const server = http.createServer(app);
 const { Server } = require("socket.io");
-const io = new Server(server);
+
 const bcrypt = require("bcrypt");
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
@@ -14,6 +14,8 @@ const session = require("express-session");
 const jwt = require("jsonwebtoken");
 const JwtStrategy = require("passport-jwt").Strategy;
 const { ExtractJwt } = require("passport-jwt");
+const dotenv = require("dotenv");
+dotenv.config();
 
 app.use(
   session({
@@ -32,7 +34,11 @@ app.use(
   })
 );
 app.use(cors({ origin: "http://localhost:3000" }));
-
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:3000",
+  },
+});
 mongoose.connect("mongodb://localhost:27017/chatAppDB");
 
 const userSchema = new mongoose.Schema({
@@ -69,69 +75,6 @@ app.post("/register", async (req, res) => {
   }
 });
 
-//login
-// app.post("/login", async (req, res) => {
-//   const username = req.body.username;
-//   const password = req.body.password;
-//   console.log(username);
-//   User.find({ username: username }).then((user) => {
-//     if (!user) {
-//       res.json({ message: "invalid username" });
-//     }
-
-//     let dbPassword = user.map((u) => {
-//       return u.password;
-//     });
-//     let dbUsername = user.map((u) => {
-//       return u.username;
-//     });
-//     let dbUserId = user.map((u) => {
-//       return u.id;
-//     });
-//     bcrypt.compare(password, dbPassword.toString()).then((isCorrect) => {
-//       if (isCorrect) {
-//         const payload = {
-//           id: dbUserId.toString(),
-//           username: dbUsername.toString(),
-//         };
-//         jwt.sign(
-//           payload,
-//           process.env.JWT_SECRET,
-//           { expiresIn: 89000 },
-//           (err, token) => {
-//             if (err) return res.json({ message: err });
-//             console.log(token);
-//             return res.json({ message: "success", token: "Bearer" + token });
-//           }
-//         );
-//       } else {
-//         res.json({ message: "invalid username or password" });
-//       }
-//     });
-//   });
-// });
-
-// //jwt verification
-// function verifyJWT(req, res, next) {
-//   const token = req.headers["x-access-token"]?.split(" ")[1];
-//   if (token) {
-//     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-//       if (err)
-//         return res.json({ isLoggedIn: false, message: "failed to verify JWT" });
-//       req.user = {};
-//       req.user.id = decoded.id;
-//       req.user.username = decoded.username;
-//       next();
-//     });
-//   } else {
-//     res.json({ message: "Invalid JWT token" });
-//   }
-// }
-
-// app.get("/user-authentication", verifyJWT, (req, res) => {
-//   res.json({ isLoggedIn: true, username: req.user.username });
-// });
-
 //Socket Funtioning
 
 passport.use(
@@ -166,7 +109,7 @@ app.post(
     // login
     jwt.sign(
       { user: req.body },
-      "*F-JaNcRfUjXn2r5u8x/A?D(G+KbPeSgVkYp3s6v9y$B&E)H@McQfTjWmZq4t7w!",
+      process.env.JWT_SECRET,
       { expiresIn: "1h" },
       (err, token) => {
         if (err) {
@@ -209,8 +152,7 @@ passport.use(
   new JwtStrategy(
     {
       jwtFromRequest: ExtractJwt.fromHeader("authorization"),
-      secretOrKey:
-        "*F-JaNcRfUjXn2r5u8x/A?D(G+KbPeSgVkYp3s6v9y$B&E)H@McQfTjWmZq4t7w!",
+      secretOrKey: process.env.JWT_SECRET,
     },
     (jwtPayload, done) => {
       console.log(jwtPayload);
@@ -280,16 +222,36 @@ app.post("/add-friend", async (req, res) => {
   const user = req.body.user;
   const friend = req.body.friend;
   console.log(user, friend);
-  await User.updateOne({ _id: user }, { $push: { friends: { friend } } }).then(
-    (res) => {
+  let checkForDuplicate;
+  User.find({ _id: user }).then((foundUser) => {
+    foundUser.map((userGot) => {
+      userGot.friends.map((friends) => {
+        if (friends.friend === friend) {
+          checkForDuplicate = true;
+          userGot.friends.pop(friends[friend]);
+        } else {
+          checkForDuplicate = false;
+        }
+      });
+      console.log(userGot);
+    });
+  });
+  console.log(checkForDuplicate);
+  if (!checkForDuplicate) {
+    await User.updateOne(
+      { _id: user },
+      { $push: { friends: { friend } } }
+    ).then((res) => {
       console.log(res);
-    }
-  );
-  User.updateOne({ _id: friend }, { $push: { friends: { user } } }).then(
-    (res) => {
-      console.log(res);
-    }
-  );
+    });
+    User.updateOne({ _id: friend }, { $push: { friends: { user } } }).then(
+      (res) => {
+        console.log(res);
+      }
+    );
+  } else {
+    console.log("friend already exists");
+  }
 });
 
 app.post("/add-room", async (req, res) => {
@@ -321,9 +283,11 @@ app.get("/logout", function (req, res) {
 
 io.on("connection", (socket) => {
   console.log("user connected");
+
   socket.broadcast.emit("you are connected to the chat room");
   socket.on("chat message", (msg) => {
     console.log(msg);
+    socket.emit("chat message", "hello from server");
   });
 });
 server.listen(8000, () => {

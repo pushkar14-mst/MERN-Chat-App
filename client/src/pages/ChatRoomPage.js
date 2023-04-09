@@ -1,67 +1,107 @@
 import { Button, TextField } from "@mui/material";
 import { Stack } from "@mui/system";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "./ChatRoomPage.css";
 import io from "socket.io-client";
-const socket = io();
+import { MantineProvider } from "@mantine/core";
+import ChatSideBar from "../components/ChatSideBar/ChatSideBar";
+import { useLocation } from "react-router";
+import axios from "axios";
+import ChatWindow from "../components/ChatWindow/ChatWindow";
+const socket = io("http://localhost:3000");
+
 const ChatRoomPage = (props) => {
+  const [allUsers, setAllUsers] = useState([]);
+  const [activeUser, setActiveUser] = useState([]);
+  const [isChatActive, setIsChatActive] = useState(false);
+  const [isConnected, setIsConnected] = useState(socket.connected);
+
+  const { state } = useLocation();
+  console.log(state);
+  const getAllUsers = async () => {
+    await axios.get("http://localhost:8000/all-users").then((res) => {
+      setAllUsers(res.data);
+    });
+  };
+
+  const sendMessage = (senderMessage) => {
+    socket.emit("chat message", {
+      sender: state.name,
+      to: activeUser,
+      message: senderMessage,
+    });
+  };
+  useEffect(() => {
+    getAllUsers();
+    console.log("connected:", socket.connected);
+
+    socket.on("connect", () => {
+      setIsConnected(true);
+    });
+
+    socket.on("chat message", (message) => {
+      console.log(message);
+    });
+    socket.on("disconnect", () => {
+      setIsConnected(false);
+    });
+    return () => {
+      socket.off("connect");
+      socket.off("disconnect");
+    };
+  }, []);
+
+  let friends = [];
+  state.friends.map((friendId) => {
+    allUsers
+      .filter((friends) => {
+        return friends._id === friendId.user;
+      })
+      .map((user) => {
+        friends.push(user);
+      });
+  });
+  console.log(friends);
+  console.log(activeUser);
+  const handleActiveUser = (active) => {
+    setActiveUser(active);
+  };
   return (
     <>
-      <h1>Chat Room</h1>
-      <h3>Room Id:</h3>
-      <div className="container" style={{ border: "1px solid #121212" }}>
-        <div className="row">
-          <div className="col-4" style={{ borderRight: "1px solid #121212" }}>
-            <div className="active-user-box">
-              <Stack direction="row" spacing={2}>
-                <img
-                  src="https://pps.whatsapp.net/v/t61.24694-24/312275896_882375832951894_1476664527601890885_n.jpg?ccb=11-4&oh=01_AdTMDUUcZebo0J5EhZRdpMMhEi1n5WUOI-iOqLlKsHZVUQ&oe=63EFAB24"
-                  className="img-responsive "
-                  style={{ borderRadius: "100%" }}
-                />
-                <h1>Pushkar</h1>
-              </Stack>
-            </div>
-            <div className="chat-friend-box">
-              <h1>User 1</h1>
-              <p>Hey whats up?</p>
-            </div>
-            <div className="chat-friend-box">
-              <h1>User 2</h1>
-              <p>Hey whats up?</p>
-            </div>
-            <div className="chat-friend-box">
-              <h1>User 3</h1>
-              <p>Hey whats up?</p>
-            </div>
-            <div className="chat-friend-box">
-              <h1>User 4</h1>
-              <p>Hey whats up?</p>
-            </div>
-          </div>
-          <div className="col-8">
-            <div
-              className="current-active-chat"
-              style={{ marginBottom: "10px" }}
-            >
-              <h1>Henry</h1>
-            </div>
-            <div className="chat-window">
-              <div className="chat-bubble__reciever my-2">Heyyy!!</div>
-              <div className="chat-bubble__sender my-2">Heyyy!!</div>
-              <div className="chat-bubble__sender">Howdie!!</div>
-            </div>
-            <div className="input-container">
-              <input
-                type="text"
-                placeholder="Type a message..."
-                className="message-input"
-              />
-              <button className="send-button">Send</button>
-            </div>
+      <MantineProvider
+        theme={{
+          fontFamily: "Verdana, sans-serif",
+          fontFamilyMonospace: "Monaco, Courier, monospace",
+          headings: {
+            fontFamily: "Greycliff CF, sans-serif",
+          },
+          colors: {
+            "ocean-blue": [
+              "#7AD1DD",
+              "#5FCCDB",
+              "#44CADC",
+              "#2AC9DE",
+              "#1AC2D9",
+              "#11B7CD",
+              "#09ADC3",
+              "#0E99AC",
+              "#128797",
+              "#147885",
+            ],
+          },
+        }}
+      >
+        {/* {friends.map((allFriends) => {
+          console.log(allFriends);
+          return <ChatSideBar friends={allFriends} />;
+        })} */}
+        <div style={{ display: "flex" }}>
+          <ChatSideBar friends={friends} activeUser={handleActiveUser} />
+          <div style={{ width: "100%" }}>
+            <ChatWindow messagesToBeSent={sendMessage} />
           </div>
         </div>
-      </div>
+      </MantineProvider>
     </>
   );
 };

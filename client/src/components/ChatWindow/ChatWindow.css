@@ -1,40 +1,17 @@
-.active-user-box {
-    padding: 0.75rem;
-    border-bottom: 1px solid #121212;
-}
-
-.active-user-box img {
-    height: 50px;
-    width: 50px;
-}
-
-.chat-friend-box {
-    border-bottom: 1px solid #121212;
-}
-
-.chat-friend-box:hover {
-    background-color: #121212;
-    color: #fff;
-    transition: all 0.2s ease-in-out;
-}
-
-.current-active-chat {
-    border-bottom: 1px solid #121212;
-}
-
 .chat-window {
     width: auto;
     height: auto;
     display: flex;
     flex-direction: column;
+    padding-left: 1rem;
+    padding-right: 1rem;
 }
-
-
 
 .chat-bubble__sender,
 .chat-bubble__reciever {
     height: auto;
     width: auto;
+    max-width: 600px;
     color: #fff;
     border-radius: 20px;
     padding: 10px;
@@ -42,15 +19,13 @@
 
 .chat-bubble__reciever {
     align-self: flex-start;
-    background-color: blueviolet;
+    background-color: rgba(67, 156, 234, 1);
 }
 
 .chat-bubble__sender {
     align-self: flex-end;
-    background-color: #121212;
+    background-color: #147885;
 }
-
-
 
 .chat-bubble__sender,
 .chat-bubble__reciever p {
@@ -65,6 +40,9 @@
     align-items: center;
     padding: 0.5rem;
     border-top: 1px solid #ccc;
+    padding-left: 1rem;
+    padding-right: 1rem;
+
 }
 
 .message-input {
@@ -78,8 +56,8 @@
 .send-button {
     padding: 0.5rem;
     border: none;
-    border-radius: 4px;
-    background-color: #0077cc;
+    border-radius: 20px;
+    background-color: #147885;
     color: #fff;
     cursor: pointer;
 
