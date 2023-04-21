@@ -285,11 +285,26 @@ io.on("connection", (socket) => {
   console.log("user connected");
 
   socket.broadcast.emit("you are connected to the chat room");
-  socket.on("chat message", (msg) => {
-    console.log(msg);
-    socket.emit("chat message", "hello from server");
+  socket.on("chat message", (obj) => {
+    console.log(obj);
+    socket.emit("latest message", obj);
+
+    User.updateOne(
+      { name: obj.sender },
+      { $push: { messages: { to: obj.to, message: obj.message } } }
+    ).then((res) => {
+      console.log(res);
+    });
+
+    User.updateOne(
+      { name: obj.to },
+      { $push: { messages: { from: obj.sender, message: obj.message } } }
+    ).then((res) => {
+      console.log(res);
+    });
   });
 });
+
 server.listen(8000, () => {
   console.log("listening on *:8000");
 });

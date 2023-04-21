@@ -1,27 +1,88 @@
 import "./ChatWindow.css";
-import { useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import io from "socket.io-client";
+const socket = io("http://localhost:3000");
+
 const ChatWindow = (props) => {
+  const {
+    allUsers,
+    getAllUsers,
+    currentUser,
+    activeUser,
+    latestSentMessage,
+    latestRecievedMessage,
+  } = props;
   const [senderMessage, setSenderMessage] = useState();
 
+  let senderHistory = [];
+  let recieverHistory = [];
+  console.log(latestRecievedMessage);
+  const buttonRef = useRef();
+
+  console.log(allUsers);
+
+  allUsers
+    .filter((user) => {
+      return user.name === currentUser;
+    })
+    .map((user) => {
+      user.messages.map((message) => {
+        console.log(message);
+
+        if (message !== null) {
+          if (message.hasOwnProperty("to")) {
+            console.log(message.to);
+            if (message.to === activeUser) {
+              senderHistory.push(message.message);
+            }
+          }
+          //console.log(message);
+        }
+      });
+    });
+  allUsers
+    .filter((user) => {
+      return user.name === currentUser;
+    })
+    .map((user) => {
+      user.messages.map((message) => {
+        console.log(message);
+
+        if (message !== null) {
+          if (message.hasOwnProperty("from")) {
+            console.log(message.from);
+            if (message.from === activeUser) {
+              recieverHistory.push(message.message);
+            }
+          }
+          //console.log(message);
+        }
+      });
+    });
+  console.log(currentUser);
+  console.log(activeUser);
+  console.log(senderHistory);
+  console.log(recieverHistory);
   return (
     <>
       <div className="chat-window">
-        <div className="chat-bubble__reciever my-2">Heyyy!!</div>
-        <div className="chat-bubble__sender my-2">Heyyy!!</div>
-        <div className="chat-bubble__sender">
-          <p>
-            Lorem Ipsum is simply dummy text of the printing and typesetting
-            industry. Lorem Ipsum has been the industry's standard dummy text
-            ever since the 1500s, when an unknown printer took a galley of type
-            and scrambled it to make a type specimen book. It has survived not
-            only five centuries, but also the leap into electronic typesetting,
-            remaining essentially unchanged. It was popularised in the 1960s
-            with the release of Letraset sheets containing Lorem Ipsum passages,
-            and more recently with desktop publishing software like Aldus
-            PageMaker including versions of Lorem Ipsum.
-          </p>
+        {recieverHistory.map((recievedMessage) => {
+          return (
+            <div className="chat-bubble__reciever my-2">{recievedMessage}</div>
+          );
+        })}
+        {senderHistory.map((senderMessage) => {
+          return (
+            <div className="chat-bubble__sender my-2">{senderMessage}</div>
+          );
+        })}
+        <div className="chat-bubble__sender my-2">{latestSentMessage}</div>
+
+        <div className="chat-bubble__reciever my-2">
+          {latestRecievedMessage}
         </div>
       </div>
+
       <div className="input-container">
         <input
           type="text"
@@ -33,10 +94,12 @@ const ChatWindow = (props) => {
           }}
         />
         <button
+          ref={buttonRef}
           className="send-button"
           onClick={(e) => {
             e.preventDefault();
             props.messagesToBeSent(senderMessage);
+            getAllUsers();
             setSenderMessage("");
           }}
         >

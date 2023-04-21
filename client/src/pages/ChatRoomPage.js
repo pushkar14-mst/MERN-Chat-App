@@ -12,11 +12,12 @@ const socket = io("http://localhost:3000");
 
 const ChatRoomPage = (props) => {
   const [allUsers, setAllUsers] = useState([]);
-  const [activeUser, setActiveUser] = useState([]);
-  const [isChatActive, setIsChatActive] = useState(false);
-  const [isConnected, setIsConnected] = useState(socket.connected);
+  const [activeUser, setActiveUser] = useState();
+  const [latestSentMessage, setLatestSentMessage] = useState();
+  const [latestRecievedMessage, setLatestRecievedMessage] = useState();
 
   const { state } = useLocation();
+
   console.log(state);
   const getAllUsers = async () => {
     await axios.get("http://localhost:8000/all-users").then((res) => {
@@ -25,26 +26,30 @@ const ChatRoomPage = (props) => {
   };
 
   const sendMessage = (senderMessage) => {
-    socket.emit("chat message", {
-      sender: state.name,
-      to: activeUser,
-      message: senderMessage,
-    });
+    if (senderMessage.length > 0) {
+      socket.emit("chat message", {
+        sender: state.name,
+        to: activeUser,
+        message: senderMessage,
+      });
+    }
+
+    getAllUsers();
   };
   useEffect(() => {
     getAllUsers();
     console.log("connected:", socket.connected);
 
-    socket.on("connect", () => {
-      setIsConnected(true);
+    socket.on("latest message", (latestMessage) => {
+      console.log("latestMessage Is", latestMessage);
+      if (latestMessage.hasOwnProperty("to")) {
+        setLatestSentMessage(latestMessage.message);
+      }
+      if (latestMessage.hasOwnProperty("sender")) {
+        setLatestRecievedMessage(latestMessage.message);
+      }
     });
 
-    socket.on("chat message", (message) => {
-      console.log(message);
-    });
-    socket.on("disconnect", () => {
-      setIsConnected(false);
-    });
     return () => {
       socket.off("connect");
       socket.off("disconnect");
@@ -98,7 +103,15 @@ const ChatRoomPage = (props) => {
         <div style={{ display: "flex" }}>
           <ChatSideBar friends={friends} activeUser={handleActiveUser} />
           <div style={{ width: "100%" }}>
-            <ChatWindow messagesToBeSent={sendMessage} />
+            <ChatWindow
+              messagesToBeSent={sendMessage}
+              allUsers={allUsers}
+              currentUser={state.name}
+              activeUser={activeUser}
+              getAllUsers={getAllUsers}
+              latestSentMessage={latestSentMessage}
+              latestRecievedMessage={latestRecievedMessage}
+            />
           </div>
         </div>
       </MantineProvider>
