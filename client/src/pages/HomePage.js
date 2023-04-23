@@ -119,7 +119,7 @@ const HomePage = () => {
   const navigate = useNavigate();
   const [roomId, setRoomId] = useState("");
   const [roomName, setRoomName] = useState("");
-  const [members, setMembers] = useState([]);
+  const [isAddedFriend, setIsAddedFriend] = useState(false);
   const [isAddingChatRoom, setIsAddingChatRoom] = useState(false);
 
   const [users, setUsers] = useState([]);
@@ -299,12 +299,7 @@ const HomePage = () => {
               )}
               {active === "Add a Friend" && (
                 <>
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                    }}
-                  >
+                  <div className="display-all-users">
                     <Title order={1} color="ocean-blue">
                       Users
                     </Title>
@@ -312,46 +307,65 @@ const HomePage = () => {
                       <IconSearch />
                       <TextInput placeholder="Search..." />
                     </Group>
+                    <div className="users-list">
+                      {users
+                        .filter((user) => {
+                          return user.username !== state.username;
+                        })
+                        .map((user, index) => {
+                          return (
+                            <div className="users-accounts">
+                              <div className="users-accounts-info">
+                                <h5>@{user.username}</h5>
+                                <h6>{user.name}</h6>
+                              </div>
+                              {!isAddedFriend ? (
+                                <button
+                                  className="request-btn"
+                                  onClick={() => {
+                                    sendFriendRequest(user._id);
+                                    setIsAddedFriend(true);
+                                  }}
+                                >
+                                  Add Friend
+                                </button>
+                              ) : (
+                                <button className="request-btn" disabled>
+                                  Friend Request Sent
+                                </button>
+                              )}
+                            </div>
+                          );
+                        })}
+                    </div>
                   </div>
-                  {/* <div className="users-list">
-                    <h3>Users</h3>
-                    {users
-                      .filter((user) => {
-                        return user.username !== state.username;
-                      })
-                      .map((user, index) => {
-                        return (
-                          <div className="users-accounts">
-                            <p>@{user.username}</p>
-                            <button
-                              onClick={() => {
-                                sendFriendRequest(user._id);
-                              }}
-                            >
-                              Add Friend
-                            </button>
-                          </div>
-                        );
-                      })}
-                  </div> */}
                 </>
               )}
               {active === "Friend Requests" && (
-                <div className="friend-requests">
-                  <h3>Friend Requests</h3>
-                  <div className="requests">
-                    {friendRequests && (
-                      <>
-                        <p>{friendRequests.username}</p>
-                        <button
-                          onClick={() => {
-                            addFriend(friendRequests._id);
-                          }}
-                        >
-                          Accept Request
-                        </button>
-                      </>
-                    )}
+                <div className="display-all-friend-requests">
+                  <Title order={1} color="ocean-blue">
+                    Friend Requests
+                  </Title>
+                  <div className="users-list">
+                    <div className="friend-requests">
+                      {friendRequests && (
+                        <>
+                          <div className="users-accounts-info">
+                            <h5>@{friendRequests.username}</h5>
+                            <h6>{friendRequests.name}</h6>
+                          </div>
+
+                          <button
+                            className="request-btn"
+                            onClick={() => {
+                              addFriend(friendRequests._id);
+                            }}
+                          >
+                            Accept Request
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
               )}

@@ -21,7 +21,7 @@
 
 .chat-bubble__reciever {
     align-self: flex-start;
-    background-color: rgba(67, 156, 234, 1);
+    background-color: #439cea;
 }
 
 .chat-bubble__sender {

@@ -71,13 +71,13 @@ const ChatWindow = (props) => {
             <div className="chat-bubble__reciever my-2">{recievedMessage}</div>
           );
         })}
+
         {senderHistory.map((senderMessage) => {
           return (
             <div className="chat-bubble__sender my-2">{senderMessage}</div>
           );
         })}
         <div className="chat-bubble__sender my-2">{latestSentMessage}</div>
-
         <div className="chat-bubble__reciever my-2">
           {latestRecievedMessage}
         </div>

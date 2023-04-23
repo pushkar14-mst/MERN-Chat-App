@@ -282,12 +282,25 @@ app.get("/logout", function (req, res) {
 });
 
 io.on("connection", (socket) => {
+  let roomName;
   console.log("user connected");
 
+  socket.on("join-room", (room) => {
+    console.log(`user ${socket.id} joined room ${room}`);
+    socket.join(room);
+    roomName = room;
+  });
   socket.broadcast.emit("you are connected to the chat room");
   socket.on("chat message", (obj) => {
     console.log(obj);
-    socket.emit("latest message", obj);
+    // Send the message only to the two clients in the room
+    // const roomName = [obj.sender, obj.to].sort().join("-");
+    // console.log(roomName);
+    // socket.join(roomName);
+
+    io.to(roomName).emit("latest message", obj);
+
+    //io.emit("latest message", obj);
 
     User.updateOne(
       { name: obj.sender },

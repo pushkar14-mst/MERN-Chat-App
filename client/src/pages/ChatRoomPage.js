@@ -1,5 +1,3 @@
-import { Button, TextField } from "@mui/material";
-import { Stack } from "@mui/system";
 import React, { useEffect, useState } from "react";
 import "./ChatRoomPage.css";
 import io from "socket.io-client";
@@ -36,6 +34,7 @@ const ChatRoomPage = (props) => {
 
     getAllUsers();
   };
+
   useEffect(() => {
     getAllUsers();
     console.log("connected:", socket.connected);
@@ -70,6 +69,9 @@ const ChatRoomPage = (props) => {
   console.log(activeUser);
   const handleActiveUser = (active) => {
     setActiveUser(active);
+
+    const roomName = `${state.name}-${active}`;
+    socket.emit("join-room", roomName);
   };
   return (
     <>
