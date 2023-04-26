@@ -289,6 +289,7 @@ io.on("connection", (socket) => {
     console.log(`user ${socket.id} joined room ${room}`);
     socket.join(room);
     roomName = room;
+    console.log("current room name is", roomName);
   });
   socket.broadcast.emit("you are connected to the chat room");
   socket.on("chat message", (obj) => {
@@ -315,6 +316,9 @@ io.on("connection", (socket) => {
     ).then((res) => {
       console.log(res);
     });
+  });
+  socket.off("disconnect", () => {
+    socket.leave(roomName);
   });
 });
 

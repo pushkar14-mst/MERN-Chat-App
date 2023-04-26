@@ -6,7 +6,19 @@
     padding-left: 1rem;
     padding-right: 1rem;
     overflow-y: scroll;
-    max-height: 900px;
+    max-height: 820px;
+}
+
+
+
+.chat-window__header {
+    background-color: #147885;
+    width: auto;
+    height: auto;
+    padding: 10px;
+    font-weight: 900;
+    color: #fff;
+
 }
 
 .chat-bubble__sender,

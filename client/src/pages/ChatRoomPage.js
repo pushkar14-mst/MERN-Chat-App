@@ -11,8 +11,7 @@ const socket = io("http://localhost:3000");
 const ChatRoomPage = (props) => {
   const [allUsers, setAllUsers] = useState([]);
   const [activeUser, setActiveUser] = useState();
-  const [latestSentMessage, setLatestSentMessage] = useState();
-  const [latestRecievedMessage, setLatestRecievedMessage] = useState();
+  const [latestMessage, setLatestMessage] = useState();
 
   const { state } = useLocation();
 
@@ -40,12 +39,8 @@ const ChatRoomPage = (props) => {
     console.log("connected:", socket.connected);
 
     socket.on("latest message", (latestMessage) => {
-      console.log("latestMessage Is", latestMessage);
-      if (latestMessage.hasOwnProperty("to")) {
-        setLatestSentMessage(latestMessage.message);
-      }
-      if (latestMessage.hasOwnProperty("sender")) {
-        setLatestRecievedMessage(latestMessage.message);
+      if (latestMessage.hasOwnProperty("message")) {
+        setLatestMessage(latestMessage);
       }
     });
 
@@ -54,7 +49,7 @@ const ChatRoomPage = (props) => {
       socket.off("disconnect");
     };
   }, []);
-
+  console.log("latestMessage Is", latestMessage);
   let friends = [];
   state.friends.map((friendId) => {
     allUsers
@@ -69,8 +64,8 @@ const ChatRoomPage = (props) => {
   console.log(activeUser);
   const handleActiveUser = (active) => {
     setActiveUser(active);
-
-    const roomName = `${state.name}-${active}`;
+    const roomName = "activeRoom";
+    // const roomName = `${state.name}-${active}`;
     socket.emit("join-room", roomName);
   };
   return (
@@ -111,8 +106,7 @@ const ChatRoomPage = (props) => {
               currentUser={state.name}
               activeUser={activeUser}
               getAllUsers={getAllUsers}
-              latestSentMessage={latestSentMessage}
-              latestRecievedMessage={latestRecievedMessage}
+              latestMessage={latestMessage}
             />
           </div>
         </div>

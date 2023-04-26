@@ -4,22 +4,20 @@ import io from "socket.io-client";
 const socket = io("http://localhost:3000");
 
 const ChatWindow = (props) => {
-  const {
-    allUsers,
-    getAllUsers,
-    currentUser,
-    activeUser,
-    latestSentMessage,
-    latestRecievedMessage,
-  } = props;
+  const { allUsers, getAllUsers, currentUser, activeUser, latestMessage } =
+    props;
   const [senderMessage, setSenderMessage] = useState();
-
+  let currentMessage = [];
   let senderHistory = [];
   let recieverHistory = [];
-  console.log(latestRecievedMessage);
+  let socketReceivedMessages = [];
   const buttonRef = useRef();
-
+  const recievingCheck =
+    latestMessage !== undefined && latestMessage.sender === activeUser;
   console.log(allUsers);
+  if (latestMessage !== undefined) {
+    socketReceivedMessages.push(latestMessage.message);
+  }
 
   allUsers
     .filter((user) => {
@@ -63,8 +61,12 @@ const ChatWindow = (props) => {
   console.log(activeUser);
   console.log(senderHistory);
   console.log(recieverHistory);
+  console.log(currentMessage);
   return (
     <>
+      <div className="chat-window__header">
+        <h2>{activeUser}</h2>
+      </div>
       <div className="chat-window">
         {recieverHistory.map((recievedMessage) => {
           return (
@@ -77,9 +79,31 @@ const ChatWindow = (props) => {
             <div className="chat-bubble__sender my-2">{senderMessage}</div>
           );
         })}
-        <div className="chat-bubble__sender my-2">{latestSentMessage}</div>
+        {currentMessage.map((message) => {
+          return <div className="chat-bubble__sender my-2">{message}</div>;
+        })}
+
+        {/* {latestMessage !== undefined &&
+          latestMessage.sender === currentUser && (
+            <div className="chat-bubble__sender my-2">
+              {latestMessage.message}
+            </div>
+          )} */}
+        {/* {latestMessage !== undefined
+          ? latestMessage.sender === activeUser && (
+              <div className="chat-bubble__reciever my-2">
+                {latestMessage.message}
+              </div>
+            )
+          : ""} */}
+        {socketReceivedMessages.length > 0 &&
+          socketReceivedMessages.map((message) => {
+            if (message === undefined || !recievingCheck) return "";
+
+            return <div className="chat-bubble__reciever my-2">{message}</div>;
+          })}
         <div className="chat-bubble__reciever my-2">
-          {latestRecievedMessage}
+          {recievingCheck && latestMessage.message}
         </div>
       </div>
 
@@ -99,6 +123,7 @@ const ChatWindow = (props) => {
           onClick={(e) => {
             e.preventDefault();
             props.messagesToBeSent(senderMessage);
+
             getAllUsers();
             setSenderMessage("");
           }}

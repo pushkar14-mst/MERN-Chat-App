@@ -24,12 +24,20 @@ const useStyles = createStyles((theme) => ({
       "#147885",
     ],
   },
+  title: {
+    display: "flex",
+    alignItems: "center",
+    fontSize: "2rem",
+    color: theme.white,
+    fontWeight: 900,
+    paddingBottom: theme.spacing.xs,
+  },
   h1: {
     ...theme.fn.focusStyles(),
     display: "flex",
     alignItems: "center",
     textDecoration: "none",
-    fontSize: "2rem",
+    fontSize: "1.8rem",
 
     color: theme.white,
     padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
@@ -96,6 +104,11 @@ const ChatSideBar = (props) => {
         }}
       >
         <Navbar width={{ sm: 300 }} p="md" className={classes.navbar}>
+          <Navbar.Section>
+            <Title order={1} className={classes.title}>
+              Chats
+            </Title>
+          </Navbar.Section>
           {allFriends.map((friend) => {
             return (
               <Navbar.Section>
@@ -108,7 +121,7 @@ const ChatSideBar = (props) => {
                     //event.preventDefault();
                     setActive(friend.name);
                   }}
-                  order={1}
+                  order={2}
                 >
                   {friend.name}
                 </Title>
