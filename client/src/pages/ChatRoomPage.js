@@ -12,7 +12,7 @@ const ChatRoomPage = (props) => {
   const [allUsers, setAllUsers] = useState([]);
   const [activeUser, setActiveUser] = useState();
   const [latestMessage, setLatestMessage] = useState();
-
+  const [activeChat, setActiveChat] = useState([]);
   const { state } = useLocation();
 
   console.log(state);
@@ -41,6 +41,9 @@ const ChatRoomPage = (props) => {
     socket.on("latest message", (latestMessage) => {
       if (latestMessage.hasOwnProperty("message")) {
         setLatestMessage(latestMessage);
+        setActiveChat((prevState) => {
+          return [latestMessage, ...prevState];
+        });
       }
     });
 
@@ -68,6 +71,7 @@ const ChatRoomPage = (props) => {
     // const roomName = `${state.name}-${active}`;
     socket.emit("join-room", roomName);
   };
+  console.log("active chats aree", activeChat);
   return (
     <>
       <MantineProvider
@@ -107,6 +111,7 @@ const ChatRoomPage = (props) => {
               activeUser={activeUser}
               getAllUsers={getAllUsers}
               latestMessage={latestMessage}
+              activeChat={activeChat}
             />
           </div>
         </div>
