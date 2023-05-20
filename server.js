@@ -1,6 +1,7 @@
 const express = require("express");
 const http = require("http");
 const cors = require("cors");
+
 const app = express();
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
@@ -15,7 +16,12 @@ const jwt = require("jsonwebtoken");
 const JwtStrategy = require("passport-jwt").Strategy;
 const { ExtractJwt } = require("passport-jwt");
 const dotenv = require("dotenv");
+const Redis = require("redis");
+
 dotenv.config();
+const redisClient = Redis.createClient();
+
+redisClient.connect();
 
 app.use(
   session({
@@ -171,8 +177,22 @@ passport.use(
 );
 app.get("/all-users", async (req, res) => {
   await User.find({}).then((user) => {
+    //redisClient.setEx("users", 3600, JSON.stringify(user));
     res.json(user);
   });
+  // redisClient.get("users", async (err, users) => {
+  //   if (err) console.log(err);
+  //   if (users) {
+  //     console.log("cache hit");
+  //     return res.json(JSON.parse(users));
+  //   } else {
+  //     console.log("cache miss");
+  //     await User.find({}).then((user) => {
+  //       //redisClient.setEx("users", 3600, JSON.stringify(user));
+  //       res.json(user);
+  //     });
+  //   }
+  // });
 });
 
 // User.find({ _id: toBeFriend }, (err, user) => {
@@ -240,15 +260,16 @@ app.post("/add-friend", async (req, res) => {
   if (!checkForDuplicate) {
     await User.updateOne(
       { _id: user },
-      { $push: { friends: { friend } } }
+      { $push: { friends: { friend: friend } } }
     ).then((res) => {
       console.log(res);
     });
-    User.updateOne({ _id: friend }, { $push: { friends: { user } } }).then(
-      (res) => {
-        console.log(res);
-      }
-    );
+    User.updateOne(
+      { _id: friend },
+      { $push: { friends: { friend: user } } }
+    ).then((res) => {
+      console.log(res);
+    });
   } else {
     console.log("friend already exists");
   }

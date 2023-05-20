@@ -57,7 +57,7 @@ const ChatRoomPage = (props) => {
   state.friends.map((friendId) => {
     allUsers
       .filter((friends) => {
-        return friends._id === friendId.user;
+        return friends._id === friendId.friend;
       })
       .map((user) => {
         friends.push(user);

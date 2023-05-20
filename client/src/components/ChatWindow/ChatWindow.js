@@ -35,11 +35,11 @@ const ChatWindow = (props) => {
     })
     .map((user) => {
       user.messages.map((message) => {
-        console.log(message);
+        //console.log(message);
 
         if (message !== null) {
           if (message.hasOwnProperty("to")) {
-            console.log(message.to);
+            //console.log(message.to);
             if (message.to === activeUser) {
               senderHistory.push(message.message);
             }
@@ -54,11 +54,11 @@ const ChatWindow = (props) => {
     })
     .map((user) => {
       user.messages.map((message) => {
-        console.log(message);
+        //console.log(message);
 
         if (message !== null) {
           if (message.hasOwnProperty("from")) {
-            console.log(message.from);
+            // console.log(message.from);
             if (message.from === activeUser) {
               recieverHistory.push(message.message);
             }

@@ -200,15 +200,16 @@ const HomePage = () => {
   state.friends.map((friendId) => {
     users
       .filter((friends) => {
-        return friends._id === friendId.user;
+        return friends._id === friendId.friend;
       })
       .map((user) => {
         friends.push(user);
       });
   });
-  console.log(friends);
-  console.log(friendRequests);
 
+  console.log("friends list", friends);
+  console.log(friendRequests);
+  const existingIDs = state.friends.map((friend) => friend.friend);
   return (
     <>
       {state === null && (
@@ -310,7 +311,10 @@ const HomePage = () => {
                     <div className="users-list">
                       {users
                         .filter((user) => {
-                          return user.username !== state.username;
+                          return (
+                            user.username !== state.username &&
+                            existingIDs.indexOf(user._id) === -1
+                          );
                         })
                         .map((user, index) => {
                           return (
@@ -325,6 +329,7 @@ const HomePage = () => {
                                   onClick={() => {
                                     sendFriendRequest(user._id);
                                     setIsAddedFriend(true);
+                                    getAllUsers();
                                   }}
                                 >
                                   Add Friend

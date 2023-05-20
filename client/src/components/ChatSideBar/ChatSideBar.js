@@ -42,7 +42,7 @@ const useStyles = createStyles((theme) => ({
     color: theme.white,
     padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
     borderRadius: theme.radius.sm,
-    fontWeight: 900,
+    fontWeight: 700,
 
     "&:hover": {
       backgroundColor: theme.fn.lighten(
@@ -112,7 +112,7 @@ const ChatSideBar = (props) => {
           {allFriends.map((friend) => {
             return (
               <Navbar.Section>
-                <Title
+                <h1
                   className={cx(classes.h1, {
                     [classes.h1Active]: friend.name === active,
                   })}
@@ -124,7 +124,7 @@ const ChatSideBar = (props) => {
                   order={2}
                 >
                   {friend.name}
-                </Title>
+                </h1>
               </Navbar.Section>
             );
           })}
